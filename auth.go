@@ -20,12 +20,12 @@ func healthHandler(w http.ResponseWriter, r *http.Request) {
 
 func createUserHandler(w http.ResponseWriter, r *http.Request) {
 	rData, err := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
 	if err != nil {
 		log.Errorf("error in reading request %s body while creating user.", r.URL)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	defer r.Body.Close()
 
 	var user modal.User
 	//unmarshal request data
@@ -40,6 +40,9 @@ func createUserHandler(w http.ResponseWriter, r *http.Request) {
 	err = user.Create()
 	if err != nil {
 		log.Errorf("error while creatng new user: %s", user.Name)
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Bad request!"))
+		return
 	}
 
 	w.WriteHeader(http.StatusCreated)
