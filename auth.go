@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"karsingh991/cns-auth/db"
 	"karsingh991/cns-auth/modal"
 	"net/http"
 	"os"
@@ -20,12 +21,12 @@ func healthHandler(w http.ResponseWriter, r *http.Request) {
 
 func createUserHandler(w http.ResponseWriter, r *http.Request) {
 	rData, err := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
 	if err != nil {
 		log.Errorf("error in reading request %s body while creating user.", r.URL)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	defer r.Body.Close()
 
 	var user modal.User
 	//unmarshal request data
@@ -40,6 +41,9 @@ func createUserHandler(w http.ResponseWriter, r *http.Request) {
 	err = user.Create()
 	if err != nil {
 		log.Errorf("error while creatng new user: %s", user.Name)
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Bad request!"))
+		return
 	}
 
 	w.WriteHeader(http.StatusCreated)
@@ -47,11 +51,28 @@ func createUserHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	port := "8080"
-	address := fmt.Sprintf(":%s", port)
 
+	const (
+		host     = "localhost"
+		port     = 5432
+		user     = "postgres"
+		password = "password"
+		dbname   = "karan"
+	)
+
+	dbDriverName := "postgres"
+	connectionStr := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
+	err := db.InitDB(dbDriverName, connectionStr)
+	if err != nil {
+		log.Errorf("error while starting server %q", err.Error())
+	}
+	log.Info("Db connection stablished, starting server...")
 	http.HandleFunc("/", healthHandler)
 	http.HandleFunc("/user/create", createUserHandler)
+
+	serverPort := "8080"
+	address := fmt.Sprintf(":%s", serverPort)
+
 	if err := http.ListenAndServe(address, nil); err != nil {
 		log.Errorf("failed starting server on adress : %s", address)
 		os.Exit(0)
