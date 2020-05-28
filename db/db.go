@@ -15,6 +15,7 @@ func InitDB(driverName, connStr string) error {
 }
 
 func Insert(queryString string) error {
+	//TODO improve this method with Query
 	_, err := db.Exec(queryString)
 	return err
 }
