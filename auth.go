@@ -40,7 +40,7 @@ func createUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	err = user.Create()
 	if err != nil {
-		log.Errorf("error while creatng new user: %s", user.Name)
+		log.Errorf("error while creatng new user: %s error: %q", user.Name, err.Error())
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("Bad request!"))
 		return
@@ -57,14 +57,15 @@ func main() {
 		port     = 5432
 		user     = "postgres"
 		password = "password"
-		dbname   = "karan"
+		dbname   = "cns"
 	)
 
 	dbDriverName := "postgres"
 	connectionStr := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
 	err := db.InitDB(dbDriverName, connectionStr)
 	if err != nil {
-		log.Errorf("error while starting server %q", err.Error())
+		log.Errorf("error while connecting to db %q", err.Error())
+		os.Exit(0)
 	}
 	log.Info("Db connection stablished, starting server...")
 	http.HandleFunc("/", healthHandler)
