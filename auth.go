@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"karsingh991/cns-auth/db"
@@ -8,7 +9,6 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/segmentio/encoding/json"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -22,6 +22,7 @@ func healthHandler(w http.ResponseWriter, r *http.Request) {
 func createUserHandler(w http.ResponseWriter, r *http.Request) {
 	rData, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
+
 	if err != nil {
 		log.Errorf("error in reading request %s body while creating user.", r.URL)
 		w.WriteHeader(http.StatusBadRequest)
@@ -50,6 +51,33 @@ func createUserHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("user created!"))
 }
 
+func getUserHandler(w http.ResponseWriter, r *http.Request) {
+	users, err := modal.GetUsers()
+	if err != nil {
+		log.Errorf("error while getting users details from db Error %q", err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Bad request!"))
+		return
+	}
+
+	jsonData, err := json.Marshal(users)
+	if err != nil {
+		log.Errorf("error while marshling users Error %q", err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Bad request!"))
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write(jsonData)
+}
+
+func initRestAPIs() {
+	http.HandleFunc("/", healthHandler)
+	http.HandleFunc("/user/create", createUserHandler)
+	http.HandleFunc("/user", getUserHandler)
+}
+
 func main() {
 
 	const (
@@ -67,9 +95,10 @@ func main() {
 		log.Errorf("error while connecting to db %q", err.Error())
 		os.Exit(0)
 	}
+
 	log.Info("Db connection stablished, starting server...")
-	http.HandleFunc("/", healthHandler)
-	http.HandleFunc("/user/create", createUserHandler)
+
+	initRestAPIs()
 
 	serverPort := "8080"
 	address := fmt.Sprintf(":%s", serverPort)

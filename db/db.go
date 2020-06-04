@@ -9,6 +9,10 @@ import (
 
 var db *sql.DB
 
+func GetCnsDB() *sql.DB {
+	return db
+}
+
 func InitDB(driverName, connStr string) error {
 	var err error
 	db, err = sql.Open(driverName, connStr)

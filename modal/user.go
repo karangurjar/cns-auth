@@ -8,10 +8,9 @@ import (
 )
 
 type User struct {
-	Name         string `json:"username"`
-	Email        string `json:"email"`
-	Password     string `json:"password"`
-	MobileNumber int    `json:"mobilenumber"`
+	Name     string `json:"username"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 func (u User) Create() error {
@@ -24,4 +23,30 @@ func (u User) Create() error {
 		return err
 	}
 	return nil
+}
+
+func GetUsers() ([]User, error) {
+	var users []User
+	db := db.GetCnsDB()
+	sql := `SELECT * FROM USERS`
+	rows, err := db.Query(sql)
+	if err != nil {
+		return users, err
+	}
+
+	for rows.Next() {
+		var name, email, password string
+		err := rows.Scan(&name, &email, &password)
+		if err != nil {
+			return users, err
+		}
+
+		users = append(users, User{
+			Name:     name,
+			Email:    email,
+			Password: password,
+		})
+	}
+	log.Info("return user: ", users)
+	return users, nil
 }
