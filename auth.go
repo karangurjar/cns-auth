@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"karsingh991/cns-auth/common"
 	"karsingh991/cns-auth/db"
 	"karsingh991/cns-auth/modal"
 	"net/http"
@@ -39,9 +40,15 @@ func createUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//convert plain password to hash before storing
+	hashedPassword, err := common.HashPassword(user.Password)
+	if err == nil {
+		user.Password = hashedPassword
+	}
+
 	err = user.Create()
 	if err != nil {
-		log.Errorf("error while creatng new user: %s error: %q", user.Name, err.Error())
+		log.Errorf("error while creatng new user: %s Error: %q", user.Name, err.Error())
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("Bad request!"))
 		return
