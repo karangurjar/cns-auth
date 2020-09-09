@@ -116,4 +116,5 @@ func main() {
 	}
 
 	log.Infof("Server started on address %s", address)
+	log.Info("end of cns-auth server")
 }
