@@ -1,2 +1,3 @@
 # cns-auth
-modify after cns base branch checkout.
+Authntication: work in progress..
+Authorization: planned
