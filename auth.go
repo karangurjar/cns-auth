@@ -13,13 +13,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func healthHandler(w http.ResponseWriter, r *http.Request) {
-	_, err := w.Write([]byte("true"))
-	if err != nil {
-		log.Error("error while sending reponse.")
-	}
-}
-
 func createUserHandler(w http.ResponseWriter, r *http.Request) {
 	rData, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()

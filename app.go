@@ -1,22 +1,25 @@
 package main
 
 import (
+	"karsingh991/cns-auth/handlers"
+
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
 
 var app *echo.Echo
 
-func Start() {
+func start() {
 	app = echo.New()
 }
 
+//register all the middlwares here
 func registerMiddleware() {
+	//logger middleware
 	app.Use(middleware.Logger())
 }
 
+//register all the rest apis here
 func registerRestApis() {
-	app.GET("/", healthHandler)
-	app.Post("/user/create", createUserHandler)
-	app.Get("/user", getUserHandler)
+	app.GET("/", handlers.HealthHandler)
 }
