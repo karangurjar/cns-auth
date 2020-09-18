@@ -73,8 +73,6 @@ func getUserHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func initRestAPIs() {
-	http.HandleFunc("/", healthHandler)
-	http.HandleFunc("/user/create", createUserHandler)
 	http.HandleFunc("/user", getUserHandler)
 }
 
@@ -98,7 +96,8 @@ func main() {
 
 	log.Info("Db connection stablished, starting server...")
 
-	initRestAPIs()
+	//register all the apis with the endpoint and handlers
+	registerRestApis()
 
 	serverPort := "8080"
 	address := fmt.Sprintf(":%s", serverPort)

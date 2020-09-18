@@ -2,6 +2,7 @@ package main
 
 import (
 	"karsingh991/cns-auth/handlers"
+	"net/http"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -22,4 +23,5 @@ func registerMiddleware() {
 //register all the rest apis here
 func registerRestApis() {
 	app.GET("/", handlers.HealthHandler)
+	http.HandleFunc("/user/create", createUserHandler)
 }
