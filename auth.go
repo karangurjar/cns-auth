@@ -30,7 +30,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	log.Info("Db connection stablished, starting server...")
+	log.Info("CNS conneted to db. Starting app ...")
 
 	//register all the apis with the endpoint and handlers
 	registerRestApis()
