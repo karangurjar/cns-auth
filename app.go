@@ -21,6 +21,7 @@ func registerMiddleware() {
 
 //register all the rest apis here
 func registerRestApis() {
+	app.Logger.Info("registering all rest endpoints.")
 	app.GET("/", handlers.HealthHandler)
 	app.POST("/user/create", handlers.createUserHandler)
 	app.GET("/user", handlers.getUserHandler)

@@ -56,7 +56,7 @@ func createUserHandler(c echo.Context) {
 	w.Write([]byte("user created!"))
 }
 
-func getUserHandler(w http.ResponseWriter, r *http.Request) {
+func getUserHandler(c echo.Context) {
 	users, err := modal.GetUsers()
 	if err != nil {
 		log.Errorf("error while getting users details from db Error %q", err.Error())
