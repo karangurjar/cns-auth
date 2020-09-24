@@ -2,13 +2,13 @@ package handlers
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"fmt"
 	"karsingh991/cns-auth/common"
 	"karsingh991/cns-auth/modal"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"google.golang.org/appengine/log"
+	"github.com/labstack/gommon/log"
 )
 
 //HealthHandler will send a true message if app is reachable.
@@ -16,26 +16,24 @@ func HealthHandler(c echo.Context) error {
 	return c.String(http.StatusOK, "True")
 }
 
-func createUserHandler(c echo.Context) {
-	body := c.Request().Body
-
-	rData, err := ioutil.ReadAll(r.Body)
-	defer r.Body.Close()
-
-	if err != nil {
-		log.Errorf("error in reading request %s body while creating user.", r.URL)
-		w.WriteHeader(http.StatusBadRequest)
-		return
+func createUserHandler(c echo.Context) error {
+	//check if body is not empty
+	if c.Request().Body == nil {
+		errMsg := fmt.Sprint("request body is empty for request: %s", c.Request().RequestURI)
+		log.Error(errMsg)
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"error": errMsg,
+		})
 	}
 
+	//read request data and bind to user
 	var user modal.User
-	//unmarshal request data
-	err = json.Unmarshal(rData, &user)
-	if err != nil {
-		log.Errorf("unmarshaling error while inserting user")
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Bad request!"))
-		return
+	if err := c.Bind(&user); err != nil {
+		errMsg := fmt.Sprintf("error while readin request, err: %s", err.Error())
+		log.Error(errMsg)
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"error": errMsg,
+		})
 	}
 
 	//convert plain password to hash before storing
@@ -46,14 +44,18 @@ func createUserHandler(c echo.Context) {
 
 	err = user.Create()
 	if err != nil {
-		log.Errorf("error while creatng new user: %s Error: %q", user.Name, err.Error())
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Bad request!"))
-		return
+		errMsg := fmt.Sprintf("error while creatng new user: %s Error: %q", user.Name, err.Error())
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error": errMsg,
+		})
 	}
 
-	w.WriteHeader(http.StatusCreated)
-	w.Write([]byte("user created!"))
+	//finaly send success message
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "user created successfully",
+		"error":   "",
+		"user":    user,
+	})
 }
 
 func getUserHandler(c echo.Context) {
