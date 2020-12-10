@@ -26,6 +26,12 @@ func (u User) Create() error {
 	return nil
 }
 
+//GetOneUser will return a user info
+func GetOneUser(userid string) (User, error) {
+	//TODO with db query
+	return User{}, nil
+}
+
 func GetUsers() ([]User, error) {
 	var users []User
 	db := db.GetCnsDB()
